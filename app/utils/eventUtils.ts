@@ -76,30 +76,3 @@ export function groupEventsByDay(events: CalendarEvent[], days: Date[]): Record<
   
   return eventsByDay;
 }
-
-/**
- * Format an event for display in PDF exports
- * This integrates with the existing Puppeteer PDF generation system
- */
-export function formatEventForPdf(event: CalendarEvent): string {
-  const startTime = new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const endTime = new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  
-  let eventHtml = `
-    <div class="event">
-      <h3>${event.summary}</h3>
-      <div class="event-time">${startTime} - ${endTime}</div>
-  `;
-  
-  if (event.location) {
-    eventHtml += `<div class="event-location">Location: ${event.location}</div>`;
-  }
-  
-  if (event.description) {
-    eventHtml += `<div class="event-description">${event.description}</div>`;
-  }
-  
-  eventHtml += '</div>';
-  
-  return eventHtml;
-}

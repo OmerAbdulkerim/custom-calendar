@@ -1,41 +1,151 @@
 # Custom Calendar
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). The application features Google OAuth authentication for user login.
+A feature-rich calendar application built with Next.js that integrates with Google Calendar API. The application allows users to view, create and delete calendar events through an intuitive user interface with various view modes (day, week, month).
+
+![Custom Calendar Screenshot](public/image.png)
+
+## Overview
+
+This custom calendar application provides a modern interface for managing your Google Calendar events. It features responsive design, multiple view options, and comprehensive event management capabilities. The app uses Google OAuth for authentication and directly integrates with the Google Calendar API to ensure your events stay synchronized.
+
+## Technology Stack
+
+### Frontend
+- **Next.js 15**: App router architecture with React server components
+- **TypeScript**: For type safety and better developer experience
+- **Tailwind CSS**: For styling and responsive design
+- **date-fns**: Library for date manipulation and formatting
+- **React Context API**: For state management
+
+### Backend
+- **Next.js API Routes**: Server-side API handling
+- **Google Calendar API**: For event management and synchronization
+- **Authentication**: Google OAuth for secure user authentication
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 20.0 or later
+- npm, yarn, or pnpm package manager
+- Google Cloud Platform account for OAuth credentials
+- Google Calendar API enabled in your GCP project
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/custom-calendar.git
+   cd custom-calendar
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
+
+3. Set up environment variables (see [Google OAuth Setup](#google-oauth-setup) section)
+
+4. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000) with your browser
+
+The application will redirect you to the login page. After authenticating with Google, you'll be redirected to the calendar interface.
+
+## Project Structure
+
+```
+/app
+  /api                 # API routes for server-side functionality
+    /auth              # Authentication API endpoints
+    /calendar          # Calendar API endpoints and event management
+  /calendar            # Calendar page components
+  /components          # Reusable UI components
+    /auth              # Authentication-related components
+    /calendar          # Calendar-specific components
+    /layout            # Layout components (header, footer, etc.)
+    /ui                # Generic UI components (buttons, dialogs, etc.)
+  /contexts            # React contexts for state management
+  /hooks               # Custom React hooks
+  /services            # Service layer for API interactions
+  /utils               # Utility functions
+    /apiUtils.ts       # API response handling utilities
+    /dateUtils.ts      # Date formatting and manipulation utilities
+    /eventUtils.ts     # Event-related utilities
+/public                # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+P.S: I am aware that utils, services, hooks and similar directories usually go outside of app directory, but I preferred to keep them inside app directory for better organization.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API Integration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Google Calendar API
 
-## Learn More
+This application integrates with the Google Calendar API to provide calendar functionality. The integration is managed through a `CalendarService` class that handles all interactions with the Google Calendar API.
 
-To learn more about Next.js, take a look at the following resources:
+Key integration points:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Authentication**: Uses OAuth2 tokens obtained during login
+2. **Event Management**:
+   - `fetchEvents`: Get all events within a date range
+   - `createEvent`: Create a new calendar event
+   - `updateEvent`: Update an existing event
+   - `deleteEvent`: Delete an event
+   - `getEventsForMonth`: Specialized endpoint for monthly view
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### API Response Handling
 
-## Deploy on Vercel
+The application uses a standardized API response format for consistent error handling and data management. The utilities in `apiUtils.ts` provide functions for:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Success responses
+- Error responses
+- Authentication errors
+- Validation errors
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Developer Guide
+
+### Working with Calendar Views
+
+The application offers multiple calendar views, each with its own component:
+
+1. **DayView**: Shows events for a single day in a detailed format
+2. **WeekView**: Displays a 7-day view with events
+3. **MonthView**: Shows a traditional month calendar grid
+
+All views use the `useCalendarView` hook which provides unified state management for:
+- Current date
+- Selected date
+- View mode (day, week, month)
+- Date range options
+- Events loading and filtering
+
+### Creating New Components
+
+When creating new components:
+
+1. Follow the existing component structure with clear separation of concerns
+2. Use TypeScript for type safety
+3. Use the reusable UI components in `/components/ui`
+4. Utilize the hooks in `/hooks` for data fetching and state management
+
+### Event Management
+
+The event deletion process follows these steps:
+
+1. User clicks delete button on an event
+2. `ConfirmationDialog` component shows to confirm the action
+3. On confirmation, `DeleteEventButton` calls the `deleteEvent` function from `useCalendar` hook
+4. After successful deletion, the page reloads to show the updated calendar
 
 ## Google OAuth Setup
 
@@ -69,10 +179,84 @@ GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback/google
 
 After setting up your Google OAuth credentials and environment variables, you can start the application using the commands in the Getting Started section.
 
+## Deployment
+
+### Vercel Deployment
+
+This application is optimized for deployment on Vercel:
+
+1. Push your code to a GitHub repository
+2. Connect your repository to Vercel
+3. Set the required environment variables in the Vercel dashboard:
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `GOOGLE_REDIRECT_URI` (update for your production domain)
+4. Deploy your application
+
+### Environment Variables for Production
+
+Make sure to update the following environment variables for your production environment:
+
+```
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
+GOOGLE_REDIRECT_URI=https://your-domain.com/api/auth/callback/google
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Authentication Problems
+
+- **Issue**: Unable to login with Google
+  - **Solution**: Verify your OAuth credentials and redirect URIs in Google Cloud Console
+
+#### Calendar Events Not Loading
+
+- **Issue**: Events not appearing in the calendar
+  - **Solution**: Check if Google Calendar API is enabled in your Google Cloud project
+  - **Solution**: Verify the token has the correct scopes for calendar access
+
+#### Event Deletion Not Refreshing UI
+
+- **Issue**: Deleted events still appear until page refresh
+  - **Solution**: The app now forces a page reload after deletion to ensure UI consistency
+
+### Debugging
+
+The application uses console logging for debugging. Check your browser's developer console for any error messages when troubleshooting.
+
+## Contributing
+
+Contributions to the Custom Calendar project are welcome! Here's how you can contribute:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add some amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
 ## Features
 
-- Google OAuth authentication
+### Authentication
+- Google OAuth authentication with secure token management
 - Protected routes requiring authentication
-- Automatic token refresh
-- Session persistence
-- Authentication error handling
+- Automatic token refresh and session persistence
+- Elegant handling of authentication errors
+
+### Calendar Management
+- Multiple calendar views: Day, Week, and Month
+- Create, view, update, and delete events
+- Real-time UI updates when events are modified
+- Event details display with color coding
+- Date and range selection for focused viewing
+- Confirmation dialogs for destructive actions
+
+### User Experience
+- Responsive design that works on desktop and mobile devices
+- Clean, modern UI with dark mode for reduced eye strain
+- Intuitive navigation between different calendar views
+- User profile management
+- Loading states with spinners for better feedback
