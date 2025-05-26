@@ -29,7 +29,7 @@ export default function LoginPage() {
           </p>
           {returnUrl !== '/dashboard' && (
             <p className="mt-2 text-xs text-blue-600">
-              You'll be redirected back to your requested page after login
+              {`You'll be redirected back to your requested page after login`}
             </p>
           )}
         </div>

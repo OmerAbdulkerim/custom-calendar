@@ -108,6 +108,7 @@ export class CalendarService {
       
       // Execute the operation
       return await operation();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const calendarError: CalendarApiError = error;
       
