@@ -9,7 +9,9 @@ import {
   endOfWeek,
   eachWeekOfInterval
 } from 'date-fns';
-import { useCalendar } from '@/app/hooks/useCalendar';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCalendarQueries, calendarKeys } from '@/app/hooks/queries/useCalendarQueries';
+import { useAuthenticatedFetch } from '@/app/hooks/useAuthenticatedFetch';
 import { CalendarEvent } from '@/app/services/calendarService';
 import { DateRangeOption } from '@/app/components/calendar';
 
@@ -19,27 +21,43 @@ export const useCalendarView = () => {
   const [viewMode, setViewMode] = useState<'month' | 'day'>('month');
   const [dateRange, setDateRange] = useState<DateRangeOption>('7-day');
   
-  // Calendar hooks
-  const { 
-    events, 
-    isLoading: isCalendarLoading,
-    fetchEvents,
-    getEventsForMonth
-  } = useCalendar();
-  
-  const [selectedDateEvents, setSelectedDateEvents] = useState<CalendarEvent[]>([]);
-  const [isEventsLoading, setIsEventsLoading] = useState(false);
-  
-  // Compute month days for the calendar grid
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  
   // For day view - calculate range dates based on selected option
   const [rangeStartDate, setRangeStartDate] = useState(new Date());
   const [rangeEndDate, setRangeEndDate] = useState(new Date());
   const [rangeDays, setRangeDays] = useState<Date[]>([]);
   const [weeks, setWeeks] = useState<Date[][]>([]);
+  
+  // Calendar query hooks
+  const { 
+    useEventsQuery,
+    useMonthEventsQuery,
+  } = useCalendarQueries();
+  
+  const queryClient = useQueryClient();
+  
+  // Query data based on the current view mode and date range
+  const monthQuery = useMonthEventsQuery(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    viewMode === 'month'
+  );
+  
+  const rangeQuery = useEventsQuery(
+    rangeStartDate.toISOString(),
+    rangeEndDate.toISOString(),
+    viewMode === 'day' && !!rangeStartDate && !!rangeEndDate
+  );
+  
+  // Consolidated events and loading states
+  const events = viewMode === 'month' ? monthQuery.data || [] : rangeQuery.data || [];
+  const isCalendarLoading = viewMode === 'month' ? monthQuery.isLoading : rangeQuery.isLoading;
+  
+  const [selectedDateEvents, setSelectedDateEvents] = useState<CalendarEvent[]>([]);
+  
+  // Compute month days for the calendar grid
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
   
   // Initialize with default 7-day range on component mount
   useEffect(() => {
@@ -48,42 +66,43 @@ export const useCalendarView = () => {
   
   // Update selected date events when selectedDate changes
   useEffect(() => {
-    setIsEventsLoading(true);
-    
-    const filteredEvents = events.filter(event => {
+    const filteredEvents = events.filter((event: CalendarEvent) => {
       const eventStart = new Date(event.start);
       return isSameDay(eventStart, selectedDate);
     });
     
     setSelectedDateEvents(filteredEvents);
-    setIsEventsLoading(false);
   }, [selectedDate, events]);
   
-  // Fetch events for the current view range
+  // Get authenticated fetch for prefetching
+  const { fetchWithAuth } = useAuthenticatedFetch();
+
+  // Prefetch next month's data when month view is active
   useEffect(() => {
-    const fetchEventsForCurrentView = async () => {
-      try {
-        if (viewMode === 'month') {
-          // For month view, load events for the entire month
-          const year = currentDate.getFullYear();
-          const month = currentDate.getMonth();
-          await getEventsForMonth(year, month);
-        } else {
-          // For day view, fetch events based on the selected range
-          await fetchEvents({
-            timeMin: rangeStartDate.toISOString(),
-            timeMax: rangeEndDate.toISOString(),
-            singleEvents: true,
-            orderBy: 'startTime'
-          });
+    if (viewMode === 'month') {
+      // Calculate next month
+      const nextMonth = new Date(currentDate);
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      
+      // Prefetch next month's data
+      queryClient.prefetchQuery({
+        queryKey: calendarKeys.month(nextMonth.getFullYear(), nextMonth.getMonth()),
+        queryFn: async () => {
+          const startOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), 1);
+          const endOfNextMonth = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0, 23, 59, 59, 999);
+          
+          const queryParams = new URLSearchParams();
+          queryParams.append('timeMin', startOfNextMonth.toISOString());
+          queryParams.append('timeMax', endOfNextMonth.toISOString());
+          queryParams.append('singleEvents', 'true');
+          queryParams.append('orderBy', 'startTime');
+          queryParams.append('maxResults', '500');
+          
+          return fetchWithAuth(`/api/calendar/events?${queryParams.toString()}`);
         }
-      } catch (err) {
-        console.error('Error fetching calendar events:', err);
-      }
-    };
-    
-    fetchEventsForCurrentView();
-  }, [viewMode, currentDate, rangeStartDate, rangeEndDate, fetchEvents, getEventsForMonth]);
+      });
+    }
+  }, [viewMode, currentDate, queryClient, fetchWithAuth]);
   
   // Handle date selection
   const handleDateSelect = (date: Date) => {
@@ -156,43 +175,38 @@ export const useCalendarView = () => {
   
   // Function to manually refresh data
   const refreshData = useCallback(async () => {
-    if (isEventsLoading) return;
+    // Invalidate and refetch the relevant queries based on view mode
+    const promises = [];
     
-    try {
-      setIsEventsLoading(true);
-      
-      if (viewMode === 'month') {
-        // For month view, load events for the entire month
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        await getEventsForMonth(year, month);
-      } else {
-        // For day view, fetch events based on the selected range
-        await fetchEvents({
-          timeMin: rangeStartDate.toISOString(),
-          timeMax: rangeEndDate.toISOString(),
-          singleEvents: true,
-          orderBy: 'startTime'
-        });
-      }
-
-      // Update selected date events
-      const filtered = events.filter(event => {
-        const eventStart = new Date(event.start);
-        return isSameDay(eventStart, selectedDate);
-      });
-      setSelectedDateEvents(filtered);
-    } catch (err) {
-      console.error('Error refreshing calendar data:', err);
-    } finally {
-      setIsEventsLoading(false);
+    if (viewMode === 'month') {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: calendarKeys.month(currentDate.getFullYear(), currentDate.getMonth())
+        })
+      );
+    } else {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: calendarKeys.dateRange(rangeStartDate.toISOString(), rangeEndDate.toISOString())
+        })
+      );
     }
-  }, [viewMode, currentDate, rangeStartDate, rangeEndDate, fetchEvents, getEventsForMonth, events, selectedDate, isEventsLoading]);
+    
+    // Also invalidate all events to ensure everything is fresh
+    promises.push(
+      queryClient.invalidateQueries({
+        queryKey: calendarKeys.events()
+      })
+    );
+    
+    // Wait for all invalidations to complete
+    return Promise.all(promises);
+  }, [viewMode, currentDate, rangeStartDate, rangeEndDate, queryClient]);
 
   // Function to refresh after event deletion
-  const refreshAfterDelete = useCallback(() => {
+  const refreshAfterDelete = useCallback(async () => {
     // Immediately refresh the calendar data after event deletion
-    refreshData();
+    return refreshData();
   }, [refreshData]);
 
   return {
@@ -204,7 +218,7 @@ export const useCalendarView = () => {
     events,
     selectedDateEvents,
     isCalendarLoading,
-    isEventsLoading,
+    isEventsLoading: monthQuery.isLoading || rangeQuery.isLoading,
     
     // Computed values
     monthDays,

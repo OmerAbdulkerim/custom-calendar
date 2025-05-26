@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useCalendar } from '@/app/hooks/useCalendar';
+import { useCalendarQueries } from '@/app/hooks/queries/useCalendarQueries';
 import ConfirmationDialog from '@/app/components/ui/ConfirmationDialog';
 
 interface DeleteEventButtonProps {
@@ -20,39 +20,28 @@ export default function DeleteEventButton({
   variant = 'icon'
 }: DeleteEventButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { deleteEvent } = useCalendar();
+  const { useDeleteEventMutation } = useCalendarQueries();
+  const deleteEventMutation = useDeleteEventMutation();
+  
+  // Track the mutation status
+  const isDeleting = deleteEventMutation.isPending;
 
   const handleDelete = async () => {
-    setIsDeleting(true);
-    
     try {
-      // Try to delete the event
-      await deleteEvent(eventId);
+      // Try to delete the event using the mutation
+      await deleteEventMutation.mutateAsync(eventId);
       setIsDialogOpen(false);
-      
-      // Force a complete refresh of the page
-      // This is the most reliable way to ensure the UI reflects the current state
-      window.location.reload();
       
       // Call custom success handler if provided
       if (onDeleteSuccess) {
         onDeleteSuccess();
       }
-      //eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to delete event:', err);
       
-      // Check if it's a 404 error (event not found) or other error
-      if (err.status === 404 || (err.message && err.message.includes('404'))) {
-        setIsDialogOpen(false); // Close dialog even for this error
-        
-        // Force a complete refresh of the page, even for 404 errors
-        // This ensures the UI is in sync with the server state
-        window.location.reload();
-      }
-    } finally {
-      setIsDeleting(false);
+      // The error handling is now managed by the mutation's onError callback
+      // Just close the dialog for any error
+      setIsDialogOpen(false);
     }
   };
 
