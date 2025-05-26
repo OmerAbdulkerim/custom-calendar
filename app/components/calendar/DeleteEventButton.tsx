@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useCalendar } from '@/app/hooks/useCalendar';
-import { useCalendarView } from '@/app/hooks/useCalendarView';
 import ConfirmationDialog from '@/app/components/ui/ConfirmationDialog';
 
 interface DeleteEventButtonProps {
@@ -23,7 +22,6 @@ export default function DeleteEventButton({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { deleteEvent } = useCalendar();
-  const { refreshAfterDelete } = useCalendarView();
 
   const handleDelete = async () => {
     setIsDeleting(true);

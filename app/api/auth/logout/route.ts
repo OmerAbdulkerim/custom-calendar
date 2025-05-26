@@ -11,7 +11,7 @@ export async function GET() {
     (await cookieStore).delete('user_info');
     
     // Redirect to home page after logout
-    return NextResponse.redirect(new URL('/', 'http://localhost:3000'));
+    return NextResponse.redirect(new URL('/', process.env.BASE_URL));
   } catch (error) {
     console.error('Error logging out:', error);
     return NextResponse.json(
