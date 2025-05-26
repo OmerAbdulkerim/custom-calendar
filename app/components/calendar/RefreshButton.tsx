@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 
 interface RefreshButtonProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRefresh: () => Promise<any>;
 }
 

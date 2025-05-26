@@ -3,6 +3,7 @@
 import React from 'react';
 import { useCalendarView } from '@/app/hooks/useCalendarView';
 import Layout from '@/app/components/layout/Layout';
+import Link from 'next/link';
 
 import {
   MonthView,
@@ -87,6 +88,27 @@ export default function CalendarPage() {
             
             {/* Refresh button */}
             <RefreshButton onRefresh={refreshData} />
+            
+            {/* Create Event button */}
+            <Link
+              href="/calendar/add"
+              className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              <svg 
+                className="w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M12 4v16m8-8H4" 
+                />
+              </svg>
+              Create Event
+            </Link>
           </div>
         </div>
         

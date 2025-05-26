@@ -2,12 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 export default function Header() {
-  const { user, logout, isAuthenticated } = useAuth();
-  const router = useRouter();
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = () => {
