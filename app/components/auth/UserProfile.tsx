@@ -9,7 +9,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ className = '' }: UserProfileProps) {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   if (!isAuthenticated || !user) {
     return null;
@@ -31,12 +31,6 @@ export default function UserProfile({ className = '' }: UserProfileProps) {
           />
         </div>
       )}
-      <button
-        onClick={logout}
-        className="text-sm text-red-500 hover:text-red-700"
-      >
-        Sign out
-      </button>
     </div>
   );
 }
