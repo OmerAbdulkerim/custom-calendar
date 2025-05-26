@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   startOfMonth, 
   endOfMonth, 
@@ -149,8 +149,12 @@ export const useCalendarView = () => {
   };
   
   // Function to manually refresh data
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
+    if (isEventsLoading) return;
+    
     try {
+      setIsEventsLoading(true);
+      
       if (viewMode === 'month') {
         // For month view, load events for the entire month
         const year = currentDate.getFullYear();
@@ -172,13 +176,20 @@ export const useCalendarView = () => {
         return isSameDay(eventStart, selectedDate);
       });
       setSelectedDateEvents(filtered);
-
-      return true;
     } catch (err) {
       console.error('Error refreshing calendar data:', err);
-      throw err;
+    } finally {
+      setIsEventsLoading(false);
     }
-  };
+  }, [viewMode, currentDate, rangeStartDate, rangeEndDate, fetchEvents, getEventsForMonth, events, selectedDate, isEventsLoading]);
+
+  // Function to refresh after event deletion
+  const refreshAfterDelete = useCallback(() => {
+    // Small delay to ensure backend has completed the deletion
+    setTimeout(() => {
+      refreshData();
+    }, 500);
+  }, [refreshData]);
 
   return {
     // State
@@ -203,6 +214,7 @@ export const useCalendarView = () => {
     setViewMode,
     handleDateSelect,
     setDateRange: handleDateRangeChange,
-    refreshData
+    refreshData,
+    refreshAfterDelete
   };
 };

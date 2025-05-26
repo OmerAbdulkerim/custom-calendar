@@ -138,8 +138,10 @@ export function useCalendar(): UseCalendarHookReturn {
     try {
       const queryParams = new URLSearchParams();
       if (calendarId) queryParams.append('calendarId', calendarId);
+
+      const questionMark = queryParams.toString() ? '?' : '';
       
-      const url = `/api/calendar/events/${eventId}?${queryParams.toString()}`;
+      const url = `/api/calendar/events/${eventId}${questionMark}${queryParams.toString()}`;
       await fetchWithAuth(url, {
         method: 'DELETE',
       });

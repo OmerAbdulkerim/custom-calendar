@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { google, calendar_v3 } from 'googleapis';
 import { refreshAccessToken } from '@/app/lib/auth/googleAuthService';
 
@@ -108,7 +109,6 @@ export class CalendarService {
       
       // Execute the operation
       return await operation();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const calendarError: CalendarApiError = error;
       
@@ -356,13 +356,29 @@ export class CalendarService {
     return this.executeWithRetry(async () => {
       const calendar = await this.getCalendarClient(accessToken);
       
-      await calendar.events.delete({
-        calendarId: calendarId || this.config.defaultCalendarId,
-        eventId,
-        sendUpdates: 'all'
-      });
-      
-      return true;
+      try {
+        // Use the calendar client to delete the event
+        await calendar.events.delete({
+          calendarId: calendarId || this.config.defaultCalendarId,
+          eventId: eventId,
+          // Don't send updates to attendees for better reliability
+          sendUpdates: 'none'
+        });
+        
+        return true;
+      } catch (error: any) { // Explicitly type as any to handle Google API errors
+        // Add more context to the error
+        console.error(`Error deleting event ${eventId}:`, error);
+        
+        // If it's a 404, we'll handle it in the route handler
+        if (error.code === 404 || (error.response && error.response.status === 404)) {
+          const notFoundError = new Error(`Event not found: ${eventId}`);
+          (notFoundError as any).code = 404;
+          throw notFoundError;
+        }
+        
+        throw error;
+      }
     });
   }
 

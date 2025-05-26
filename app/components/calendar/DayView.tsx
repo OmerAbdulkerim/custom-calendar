@@ -4,6 +4,7 @@ import React from 'react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
 import { CalendarEvent } from '@/app/services/calendarService';
 import { formatEventTime, getEventColor } from '@/app/components/calendar/utils';
+import DeleteEventButton from '@/app/components/calendar/DeleteEventButton';
 
 interface DayViewProps {
   currentDate: Date;
@@ -73,9 +74,15 @@ const DayView: React.FC<DayViewProps> = ({
                 >
                   <div className="flex justify-between items-start">
                     <h4 className="font-medium text-white">{event.summary}</h4>
-                    <span className="text-sm text-gray-400">
-                      {formatEventTime(event.start)} - {formatEventTime(event.end)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-400">
+                        {formatEventTime(event.start)} - {formatEventTime(event.end)}
+                      </span>
+                      <DeleteEventButton 
+                        eventId={event.id} 
+                        eventTitle={event.summary} 
+                      />
+                    </div>
                   </div>
                   {event.description && (
                     <p className="text-sm text-gray-300 mt-2">{event.description}</p>

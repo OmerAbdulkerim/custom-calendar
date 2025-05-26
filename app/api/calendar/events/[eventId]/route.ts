@@ -113,6 +113,8 @@ export async function PATCH(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   const params = request.nextUrl.searchParams;
+
+  const eventId = request.url.split('/').pop() || "";
   try {
     // Get the access token from cookies
     const cookieStore = cookies();
@@ -125,17 +127,32 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const eventId = params.get('eventId') as string;
-    const calendarId = params.get('calendarId') as string || undefined;
+    const calendarId = params.get('calendarId') as string;
     
     // Delete the event
-    await calendarService.deleteEvent(
-      accessToken,
-      eventId,
-      calendarId
-    );
-    
-    return NextResponse.json({ success: true }, { status: 200 });
+    try {
+      await calendarService.deleteEvent(
+        accessToken,
+        eventId,
+        calendarId
+      );
+      
+      return NextResponse.json({ success: true }, { status: 200 });
+    } catch (innerError: any) {
+      // Check for 404 in the error message or status since Google API sometimes returns HTML errors
+      if (innerError.status === 404 || (innerError.message && innerError.message.includes('404'))) {
+        console.log("INNER ERROR 2: ", innerError)
+        console.warn(`Event not found or already deleted: ${eventId}`);
+        // Return success even if event was not found, as the end result is the same - it's gone
+        return NextResponse.json({ 
+          success: true, 
+          warning: 'Event not found or already deleted' 
+        }, { status: 404 });
+      }
+      
+      // Rethrow for other errors to be handled by the main catch block
+      throw innerError;
+    }
   } catch (error: any) {
     console.error(`Error deleting calendar event ${params.get('eventId')}:`, error);
     
@@ -145,15 +162,20 @@ export async function DELETE(request: NextRequest) {
         { error: 'Authentication failed' },
         { status: 401 }
       );
-    } else if (error.code === 404) {
+    } else if (error.code === 404 || (error.message && error.message.includes('404'))) {
+      console.log("ERROR 404: ", error)
+      // Return 200 with warning instead of 404 error, since the end result is what the user wanted
       return NextResponse.json(
-        { error: 'Event not found' },
-        { status: 404 }
+        { 
+          success: true, 
+          warning: 'Event not found or already deleted' 
+        },
+        { status: 200 }
       );
     }
     
     return NextResponse.json(
-      { error: 'Failed to delete calendar event' },
+      { error: `Failed to delete calendar event, ${error}` },
       { status: 500 }
     );
   }

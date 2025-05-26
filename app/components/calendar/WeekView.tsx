@@ -4,6 +4,7 @@ import React from 'react';
 import { format, isSameDay, addDays, subDays } from 'date-fns';
 import { CalendarEvent } from '@/app/services/calendarService';
 import { formatEventTime, getEventColor } from '@/app/components/calendar/utils';
+import DeleteEventButton from '@/app/components/calendar/DeleteEventButton';
 
 interface WeekViewProps {
   currentDate: Date;
@@ -91,10 +92,19 @@ const WeekView: React.FC<WeekViewProps> = ({
                 {dayEvents.map((event) => (
                   <div 
                     key={event.id} 
-                    className={`px-2 py-1 text-xs truncate rounded-lg border ${getEventColor(event.colorId)}`}
+                    className={`px-2 py-1 text-xs rounded-lg border ${getEventColor(event.colorId)} flex items-center justify-between gap-1 group`}
                     title={event.summary}
                   >
-                    {formatEventTime(event.start)} {event.summary}
+                    <div className="truncate">
+                      {formatEventTime(event.start)} {event.summary}
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <DeleteEventButton 
+                        eventId={event.id} 
+                        eventTitle={event.summary} 
+                        size="sm"
+                      />
+                    </div>
                   </div>
                 ))}
                 {dayEvents.length === 0 && (

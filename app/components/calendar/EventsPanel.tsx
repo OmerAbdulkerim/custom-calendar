@@ -4,6 +4,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { CalendarEvent } from '@/app/services/calendarService';
 import { formatEventTime } from '@/app/components/calendar/utils';
+import DeleteEventButton from '@/app/components/calendar/DeleteEventButton';
 
 interface EventsPanelProps {
   selectedDate: Date;
@@ -41,15 +42,18 @@ const EventsPanel: React.FC<EventsPanelProps> = ({
       <h3 className="font-medium text-white mb-4">Events on {format(selectedDate, 'MMMM d, yyyy')}</h3>
       <div className="space-y-3">
         {events.map((event) => (
-          <div 
-            key={event.id} 
-            className="p-4 rounded-lg border bg-gray-800/50 border-gray-700"
-          >
+          <div key={event.id} className="p-4 border-b border-gray-800 last:border-0">
             <div className="flex justify-between items-start">
-              <h4 className="font-medium text-white">{event.summary}</h4>
-              <span className="text-sm text-gray-400">
-                {formatEventTime(event.start)} - {formatEventTime(event.end)}
-              </span>
+              <h3 className="text-white font-medium">{event.summary}</h3>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-400">
+                  {formatEventTime(event.start)} - {formatEventTime(event.end)}
+                </span>
+                <DeleteEventButton 
+                  eventId={event.id} 
+                  eventTitle={event.summary} 
+                />
+              </div>
             </div>
             {event.description && (
               <p className="text-sm text-gray-300 mt-2">{event.description}</p>
