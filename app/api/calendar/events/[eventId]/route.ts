@@ -1,20 +1,14 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import calendarService from '@/app/services/calendarService';
 
-interface Params {
-  params: {
-    eventId: string;
-  };
-}
-
 /**
  * GET handler for fetching a single calendar event
  */
-export async function GET(request: NextRequest, { params }: Params) {
+export async function GET(request: NextRequest) {
+
+  const params = request.nextUrl.searchParams;
   try {
     // Get the access token from cookies
     const cookieStore = cookies();
@@ -27,8 +21,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       );
     }
     
-    const { eventId } = params;
-    const calendarId = request.nextUrl.searchParams.get('calendarId') || undefined;
+    const eventId = params.get('eventId') as string;
+    const calendarId = params.get('calendarId') as string || undefined;
     
     // Get the event
     const event = await calendarService.getEvent(
@@ -39,7 +33,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     
     return NextResponse.json(event);
   } catch (error: any) {
-    console.error(`Error fetching calendar event ${params.eventId}:`, error);
+    console.error(`Error fetching calendar event ${params.get('eventId')}:`, error);
     
     // Handle different error types
     if (error.code === 401 || error.code === 403) {
@@ -64,7 +58,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 /**
  * PATCH handler for updating an event
  */
-export async function PATCH(request: NextRequest, { params }: Params) {
+export async function PATCH(request: NextRequest) {
+  const params = request.nextUrl.searchParams;
   try {
     // Get the access token from cookies
     const cookieStore = cookies();
@@ -77,8 +72,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       );
     }
     
-    const { eventId } = params;
-    const calendarId = request.nextUrl.searchParams.get('calendarId') || undefined;
+    const eventId = params.get('eventId') as string;
+    const calendarId = params.get('calendarId') as string || undefined;
     const eventData = await request.json();
     
     // Update the event
@@ -91,7 +86,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     
     return NextResponse.json(updatedEvent);
   } catch (error: any) {
-    console.error(`Error updating calendar event ${params.eventId}:`, error);
+    console.error(`Error updating calendar event ${params.get('eventId')}:`, error);
     
     // Handle different error types
     if (error.code === 401 || error.code === 403) {
@@ -116,7 +111,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 /**
  * DELETE handler for deleting an event
  */
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(request: NextRequest) {
+  const params = request.nextUrl.searchParams;
   try {
     // Get the access token from cookies
     const cookieStore = cookies();
@@ -129,8 +125,8 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       );
     }
     
-    const { eventId } = params;
-    const calendarId = request.nextUrl.searchParams.get('calendarId') || undefined;
+    const eventId = params.get('eventId') as string;
+    const calendarId = params.get('calendarId') as string || undefined;
     
     // Delete the event
     await calendarService.deleteEvent(
@@ -141,7 +137,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
-    console.error(`Error deleting calendar event ${params.eventId}:`, error);
+    console.error(`Error deleting calendar event ${params.get('eventId')}:`, error);
     
     // Handle different error types
     if (error.code === 401 || error.code === 403) {
