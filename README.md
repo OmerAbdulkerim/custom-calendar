@@ -162,10 +162,10 @@ The event deletion process follows these steps:
 6. Add a name for your OAuth client
 7. Add authorized JavaScript origins:
    - For development: `http://localhost:3000`
-   - For production: `https://custom-calendar-lyart.vercel.app` (Or your custom domain)
+   - For production: `https://custom-calendar-taupe.vercel.app` (Or your custom domain)
 8. Add authorized redirect URIs:
    - For development: `http://localhost:3000/api/auth/callback/google`
-   - For production: `https://custom-calendar-lyart.vercel.app/api/auth/callback/google` (Or your custom domain)
+   - For production: `https://custom-calendar-taupe.vercel.app/api/auth/callback/google` (Or your custom domain)
 9. Click **Create**
 
 ### 2. Configure Environment Variables
