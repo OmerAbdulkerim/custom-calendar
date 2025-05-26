@@ -99,9 +99,15 @@ export const useCalendarView = () => {
     setDateRange(range);
     
     if (range === '1-day') {
-      // Single day view
-      setRangeStartDate(currentDate);
-      setRangeEndDate(currentDate);
+      // Single day view - set the range to cover the entire day
+      const startOfDay = new Date(currentDate);
+      startOfDay.setHours(0, 0, 0, 0); // Set to beginning of day (midnight)
+      
+      const endOfDay = new Date(currentDate);
+      endOfDay.setHours(23, 59, 59, 999); // Set to end of day (23:59:59.999)
+      
+      setRangeStartDate(startOfDay);
+      setRangeEndDate(endOfDay);
       setRangeDays([currentDate]);
     } else if (range === '7-day') {
       // Week view (7 days)
@@ -185,10 +191,8 @@ export const useCalendarView = () => {
 
   // Function to refresh after event deletion
   const refreshAfterDelete = useCallback(() => {
-    // Small delay to ensure backend has completed the deletion
-    setTimeout(() => {
-      refreshData();
-    }, 500);
+    // Immediately refresh the calendar data after event deletion
+    refreshData();
   }, [refreshData]);
 
   return {

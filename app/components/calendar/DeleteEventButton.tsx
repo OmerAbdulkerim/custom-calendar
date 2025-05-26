@@ -33,8 +33,9 @@ export default function DeleteEventButton({
       await deleteEvent(eventId);
       setIsDialogOpen(false);
       
-      // Refresh the calendar view after deletion
-      refreshAfterDelete();
+      // Force a complete refresh of the page
+      // This is the most reliable way to ensure the UI reflects the current state
+      window.location.reload();
       
       // Call custom success handler if provided
       if (onDeleteSuccess) {
@@ -47,7 +48,10 @@ export default function DeleteEventButton({
       // Check if it's a 404 error (event not found) or other error
       if (err.status === 404 || (err.message && err.message.includes('404'))) {
         setIsDialogOpen(false); // Close dialog even for this error
-        refreshAfterDelete(); // Still refresh to sync with server state
+        
+        // Force a complete refresh of the page, even for 404 errors
+        // This ensures the UI is in sync with the server state
+        window.location.reload();
       }
     } finally {
       setIsDeleting(false);
