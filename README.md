@@ -2,6 +2,9 @@
 
 A feature-rich calendar application built with Next.js that integrates with Google Calendar API. The application allows users to view, create and delete calendar events through an intuitive user interface with various view modes (day, week, month).
 
+The application can be found [here](https://custom-calendar-taupe.vercel.app/).
+It is deployed on Vercel.
+
 ![Custom Calendar Screenshot](public/image.png)
 
 ## Overview
@@ -226,17 +229,6 @@ GOOGLE_REDIRECT_URI=https://your-domain.com/api/auth/callback/google
 ### Debugging
 
 The application uses console logging for debugging. Check your browser's developer console for any error messages when troubleshooting.
-
-## Contributing
-
-Contributions to the Custom Calendar project are welcome! Here's how you can contribute:
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add some amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
 
 ## Features
 
