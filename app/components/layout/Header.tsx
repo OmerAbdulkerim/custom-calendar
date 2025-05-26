@@ -39,12 +39,6 @@ export default function Header() {
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
-              href="/" 
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Home
-            </Link>
-            <Link 
               href="/calendar" 
               className="text-gray-300 hover:text-white transition-colors"
             >
@@ -139,13 +133,6 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden mt-3 pb-3 border-t border-gray-800">
             <nav className="flex flex-col space-y-3 mt-3">
-              <Link 
-                href="/dashboard" 
-                className="text-gray-300 hover:text-white transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
               <Link 
                 href="/calendar" 
                 className="text-gray-300 hover:text-white transition-colors"

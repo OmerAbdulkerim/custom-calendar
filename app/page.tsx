@@ -1,8 +1,23 @@
+'use client';
+
+import { useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import LoginButton from "@/app/components/auth/LoginButton";
 import UserProfile from "@/app/components/auth/UserProfile";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 export default function Home() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  // Redirect to calendar page if user is already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.push('/calendar');
+    }
+  }, [isAuthenticated, isLoading, router]);
+  
   return (
     <div className="grid grid-rows-[auto_1fr_auto] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <header className="w-full flex justify-between items-center py-4">
