@@ -29,7 +29,6 @@ export default function CalendarPage() {
     monthDays,
     rangeStartDate,
     rangeEndDate,
-    rangeDays,
     weeks,
     setCurrentDate,
     setViewMode,
@@ -145,9 +144,6 @@ export default function CalendarPage() {
                 {viewMode === 'day' && dateRange === '7-day' && (
                   <WeekView
                     currentDate={currentDate}
-                    rangeDays={rangeDays}
-                    rangeStartDate={rangeStartDate}
-                    rangeEndDate={rangeEndDate}
                     events={events}
                     onDateSelect={handleDateSelect}
                     onDateChange={setCurrentDate}
