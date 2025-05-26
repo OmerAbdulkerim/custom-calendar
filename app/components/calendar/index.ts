@@ -4,6 +4,7 @@ export { default as WeekView } from '@/app/components/calendar/WeekView';
 export { default as MonthRangeView } from '@/app/components/calendar/MonthRangeView';
 export { default as EventsPanel } from '@/app/components/calendar/EventsPanel';
 export { default as DateRangeSelector } from '@/app/components/calendar/DateRangeSelector';
+export { default as RefreshButton } from '@/app/components/calendar/RefreshButton';
 export * from './utils';
 
 // Export shared types

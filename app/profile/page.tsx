@@ -9,7 +9,7 @@ export default function ProfilePage() {
   const { user } = useAuth();
 
   if (!user) {
-    return null; // Should be handled by middleware
+    return null;
   }
 
   return (

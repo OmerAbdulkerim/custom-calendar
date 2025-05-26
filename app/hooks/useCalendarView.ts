@@ -148,6 +148,38 @@ export const useCalendarView = () => {
     }
   };
   
+  // Function to manually refresh data
+  const refreshData = async () => {
+    try {
+      if (viewMode === 'month') {
+        // For month view, load events for the entire month
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        await getEventsForMonth(year, month);
+      } else {
+        // For day view, fetch events based on the selected range
+        await fetchEvents({
+          timeMin: rangeStartDate.toISOString(),
+          timeMax: rangeEndDate.toISOString(),
+          singleEvents: true,
+          orderBy: 'startTime'
+        });
+      }
+
+      // Update selected date events
+      const filtered = events.filter(event => {
+        const eventStart = new Date(event.start);
+        return isSameDay(eventStart, selectedDate);
+      });
+      setSelectedDateEvents(filtered);
+
+      return true;
+    } catch (err) {
+      console.error('Error refreshing calendar data:', err);
+      throw err;
+    }
+  };
+
   return {
     // State
     currentDate,
@@ -170,6 +202,7 @@ export const useCalendarView = () => {
     setCurrentDate,
     setViewMode,
     handleDateSelect,
-    setDateRange: handleDateRangeChange
+    setDateRange: handleDateRangeChange,
+    refreshData
   };
 };

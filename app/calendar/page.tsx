@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useCalendarView } from '@/app/hooks/useCalendarView';
+import Layout from '@/app/components/layout/Layout';
 
 import {
   MonthView,
@@ -9,7 +10,8 @@ import {
   WeekView,
   MonthRangeView,
   EventsPanel,
-  DateRangeSelector
+  DateRangeSelector,
+  RefreshButton
 } from '@/app/components/calendar';
 
 export default function CalendarPage() {
@@ -31,7 +33,8 @@ export default function CalendarPage() {
     setCurrentDate,
     setViewMode,
     handleDateSelect,
-    setDateRange
+    setDateRange,
+    refreshData
   } = useCalendarView();
 
 
@@ -39,7 +42,7 @@ export default function CalendarPage() {
 
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <Layout>
       <div className="container mx-auto py-8 px-4">
         <div className="mb-6 flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
           <h1 className="text-2xl font-bold">Calendar</h1>
@@ -81,6 +84,9 @@ export default function CalendarPage() {
                 onChange={(range) => setDateRange(range)}
               />
             )}
+            
+            {/* Refresh button */}
+            <RefreshButton onRefresh={refreshData} />
           </div>
         </div>
         
@@ -154,6 +160,6 @@ export default function CalendarPage() {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 }
